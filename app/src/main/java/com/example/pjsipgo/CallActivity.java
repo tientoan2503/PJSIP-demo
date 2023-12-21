@@ -2,7 +2,12 @@ package com.example.pjsipgo;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioFormat;
+import android.media.AudioRecord;
+import android.media.MediaRecorder;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -76,6 +81,95 @@ public class CallActivity extends AppCompatActivity implements SurfaceHolder.Cal
     public static final int TYPE_OUT_CALL = 647;
     public static final int TYPE_CALL_CONNECTED = 648;
 
+    static {
+        System.loadLibrary("solicall_jni");
+    }
+
+    public native int processSpeakerFrame(byte[] input);
+    public native int processMicFrame(byte[] input);
+
+    public class AudioRecordTask extends AsyncTask<Void, Void, Void> {
+        private static final String TAG = "AudioRecordTask";
+
+        private static final int SAMPLE_RATE = 44100;
+        private static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
+        private static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+        private final int BUFFER_SIZE = 128;
+
+        private AudioRecord audioRecord;
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                // Khởi tạo AudioRecord
+                audioRecord = new AudioRecord(
+                        MediaRecorder.AudioSource.MIC,
+                        SAMPLE_RATE,
+                        CHANNEL_CONFIG,
+                        AUDIO_FORMAT,
+                        BUFFER_SIZE
+                );
+
+                // Bắt đầu ghi âm
+                audioRecord.startRecording();
+
+                // Mảng để lưu trữ dữ liệu từ microphone
+                byte[] buffer = new byte[BUFFER_SIZE];
+                int count = 0;
+                while (!isCancelled()) {
+                    // Đọc dữ liệu từ microphone vào buffer
+                    int bytesRead = audioRecord.read(buffer, 0, buffer.length);
+
+                    if (bytesRead > 0 && count > 0) {
+                        // Xử lý dữ liệu ở đây (ví dụ: gửi dữ liệu đến hàm xử lý âm thanh)
+                        processAudioData(buffer, bytesRead);
+                    }
+                    count++;
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error in AudioRecordTask: " + e.getMessage());
+            } finally {
+                // Dừng ghi âm và giải phóng tài nguyên
+                if (audioRecord != null) {
+                    audioRecord.stop();
+                    audioRecord.release();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onCancelled() {
+            // Được gọi khi AsyncTask bị hủy (ví dụ: khi hoạt động không còn cần thiết)
+            if (audioRecord != null) {
+                audioRecord.stop();
+                audioRecord.release();
+            }
+        }
+
+        private void processAudioData(byte[] audioData, int bytesRead) {
+            // Xử lý dữ liệu âm thanh ở đây
+            // Ví dụ: in ra số lượng bytes đã đọc từ microphone
+            Log.d(TAG, "Bytes read from microphone: " + audioData.length);
+            for (int i = 0 ; i < audioData.length; i++) {
+                if (audioData[i] != 0) {
+                    break;
+                }
+                if (i == audioData.length - 1) {
+                    return;
+                }
+            }
+
+            processSpeakerFrame(audioData);
+            processMicFrame(audioData);
+        }
+    }
+
+
+    private void recordMicro() {
+        AudioRecordTask audioRecordTask = new AudioRecordTask();
+        audioRecordTask.execute();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +178,7 @@ public class CallActivity extends AppCompatActivity implements SurfaceHolder.Cal
         ButterKnife.bind(this);
         registReceiver();
         initData();
+        recordMicro();
     }
 
     private void registReceiver() {

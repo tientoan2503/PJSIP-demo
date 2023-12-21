@@ -23,6 +23,7 @@ android {
         targetSdkVersion 28
         versionCode 18
         versionName version
+        ndkVersion "22.1.7171670"
     }
     buildTypes {
         release {

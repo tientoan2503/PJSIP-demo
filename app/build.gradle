@@ -9,12 +9,38 @@ android {
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
+        ndkVersion "24.0.8215888"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        externalNativeBuild {
+            /*cmake {
+                cppFlags ""
+
+                //配置编译 C/C++ 源文件为哪几个 CPU 指令集的函数库 (arm , x86 等)
+                abiFilters "armeabi-v7a"
+            }*/
+            ndkBuild{
+                abiFilters "armeabi-v7a" /*, "arm64-v8a", "x86", "x86_64"*/
+            }
+        }
+
+        //配置 APK 打包 哪些动态库
+        //  示例 : 如在工程中集成了第三方库 , 其提供了 arm, x86, mips 等指令集的动态库
+        //        那么为了控制打包后的应用大小, 可以选择性打包一些库 , 此处就是进行该配置
+        ndk{
+            // 打包生成的 APK 文件指挥包含 ARM 指令集的动态库
+            abiFilters "armeabi-v7a" /*, "arm64-v8a", "x86", "x86_64"*/
+        }
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    externalNativeBuild {
+        ndkBuild{
+            path "src/main/jni/Android.mk"
         }
     }
     compileOptions {

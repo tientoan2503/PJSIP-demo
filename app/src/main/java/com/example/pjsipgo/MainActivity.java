@@ -47,10 +47,19 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_PERMISSIONS_STORAGE = 0x100;
 
+    static {
+        System.loadLibrary("solicall_jni");
+    }
+
+    public native int packageInit();
+    public native int AECInit();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        int init = packageInit();
+        Log.d("toannt", "onCreate: " + init);
         ButterKnife.bind(this);
         mReceiver.register(this);
         Logger.setLogLevel(Logger.LogLevel.DEBUG);
@@ -185,6 +194,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onIncomingCall(String accountID, int callID, String displayName, String remoteUri, boolean isVideo) {
             super.onIncomingCall(accountID, callID, displayName, remoteUri, isVideo);
+            AECInit();
             CallActivity.startActivityIn(getReceiverContext(), accountID, callID, displayName, remoteUri, isVideo);
         }
 

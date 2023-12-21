@@ -17,29 +17,29 @@
             android:id="@+id/etAccount"
             android:layout_width="400dp"
             android:layout_height="wrap_content"
-            android:hint="sip账号"
-            android:text="47076413" />
+            android:hint="Số intercom"
+            android:text="800" />
 
         <EditText
             android:id="@+id/etPwd"
             android:layout_width="400dp"
             android:layout_height="wrap_content"
-            android:hint="sip密码"
-            android:text="123456" />
+            android:hint="Mật khẩu"
+            android:text="12345678" />
 
         <EditText
             android:id="@+id/etServer"
             android:layout_width="400dp"
             android:layout_height="wrap_content"
             android:hint="sip服务器地址"
-            android:text="192.168.2.243" />
+            android:text="192.168.0.79" />
 <!--            android:text="301759.3D0F50.sip.newrocktech.com" />-->
 
         <EditText
             android:id="@+id/etPort"
             android:layout_width="400dp"
             android:layout_height="wrap_content"
-            android:hint="端口"
+            android:hint="Port"
             android:inputType="number"
             android:text="5060" />
 
@@ -62,8 +62,8 @@
             android:id="@+id/etCallNumer"
             android:layout_width="400dp"
             android:layout_height="wrap_content"
-            android:hint="呼叫账号"
-            android:text="1004" />
+            android:hint="sip:số@ip_address"
+            android:text="sip:801@192.168.0.79" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -75,13 +75,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="20dp"
                 android:onClick="audioCall"
-                android:text="语音呼叫" />
+                android:text="Audio call" />
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="videoCall"
-                android:text="视频呼叫" />
+                android:text="Video call" />
         </LinearLayout>
 
     </LinearLayout>
